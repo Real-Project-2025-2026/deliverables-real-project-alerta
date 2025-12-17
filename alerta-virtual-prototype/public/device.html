@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alerta Prototype</title>
+    <style>
+        /* Basic Settings */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+            height: 100vh; 
+            height: 100dvh; 
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 15vh; 
+                padding-bottom: calc(15vh + env(safe-area-inset-bottom));
+            }
+            .device-container {
+                width: 350px; 
+                max-width: 85vw;
+            }
+        }
+
+        h1 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
+
+        /* --- Device Container --- */
+        .device-container {
+            position: relative;
+            width: 400px;
+            max-width: 90vw;
+            user-select: none; 
+            -webkit-user-drag: none;
+        }
+
+        #main-device-image {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+        }
+
+        /* --- LED Overlay --- */
+        .led-glow {
+            position: absolute;
+            top: 42.5%; right: 23.9%;   
+            width: 2%; height: 2%;
+            border-radius: 50%;
+            background-color: transparent; 
+            opacity: 0; 
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        .led-glow.active {
+            background-color: #003300; 
+            background: radial-gradient(circle at 40% 40%, #bdffbd 0%, #00cc00 45%, #004d00 100%);
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8), inset -1px -1px 2px rgba(255,255,255,0.2);
+            opacity: 0.4; 
+            animation: pulse-realistic 0.6s ease-in-out 3; 
+        }
+
+        .led-glow.active-red {
+            background-color: #330000; 
+            background: radial-gradient(circle at 40% 40%, #ffbdbd 0%, #cc0000 45%, #4d0000 100%);
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8), inset -1px -1px 2px rgba(255,255,255,0.2);
+            opacity: 0.4; 
+            animation: pulse-realistic-red 0.6s ease-in-out 3; 
+        }
+
+        @keyframes pulse-realistic {
+            0% { filter: brightness(0.8); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8); }
+            50% { filter: brightness(1.4); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5), 0 0 10px rgba(0, 255, 0, 0.7), 0 0 20px rgba(0, 255, 0, 0.5); }
+            100% { filter: brightness(0.8); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8); }
+        }
+
+        @keyframes pulse-realistic-red {
+            0% { filter: brightness(0.8); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8); }
+            50% { filter: brightness(1.4); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5), 0 0 10px rgba(255, 0, 0, 0.7), 0 0 20px rgba(255, 0, 0, 0.5); }
+            100% { filter: brightness(0.8); box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8); }
+        }
+
+        /* --- Hitboxes --- */
+        .hitbox {
+            position: absolute;
+            cursor: pointer;
+            background-color: rgba(255, 0, 0, 0.0);
+            z-index: 20;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #hitbox-center { top: 42%; left: 36%; width: 28%; height: 27%; border-radius: 50%; }
+        #hitbox-side { top: 50%; right: 17%; width: 10%; height: 14%; border-radius: 30%; transform: rotate(-10deg); }
+
+        /* --- Status Box --- */
+        .status-container {
+            margin-top: 30px;
+            width: 340px; 
+            min-height: 80px; 
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        .status-content { position: relative; z-index: 2; width: 100%; }
+        .status-title { font-weight: 700; color: #333; font-size: 1.1em; margin-bottom: 4px; display: block; }
+        .status-detail { font-size: 0.85em; color: #666; line-height: 1.4; word-break: break-word; }
+        .status-detail a { color: #007bff; text-decoration: none; font-weight: bold; }
+        .progress-bar { position: absolute; top: 0; left: 0; bottom: 0; width: 0%; background-color: #ffebee; z-index: 1; transition: none; }
+        
+        /* FIX: Hier ist die Änderung! 3s statt 5s */
+        .progress-bar.loading { 
+            width: 100%; 
+            transition: width 3s linear; 
+            background-color: #ffcdd2; 
+        }
+        
+        .progress-bar.success { background-color: #e8f5e9; transition: background-color 0.3s; }
+
+        /* --- Settings / Test Mode Box --- */
+        .settings-box {
+            margin-top: 15px;
+            width: 340px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #444;
+        }
+        .settings-title {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: bold; margin-bottom: 8px;
+        }
+        .mode-option {
+            display: flex; align-items: flex-start; margin-bottom: 8px; cursor: pointer;
+        }
+        .mode-option:last-child { margin-bottom: 0; }
+        .mode-option input { margin-top: 3px; margin-right: 8px; cursor: pointer; accent-color: #333; }
+        .mode-text small { display: block; color: #777; margin-top: 2px; font-size: 0.75rem; }
+        .warning-text { color: #d32f2f !important; font-weight: 600; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Alerta Prototype</h1>
+
+    <div class="device-container">
+        <img id="main-device-image" src="alerta-normal.png" alt="Alerta Device">
+        <div id="led-light" class="led-glow"></div>
+        <div id="hitbox-center" class="hitbox" title="SOS"></div>
+        <div id="hitbox-side" class="hitbox" title="Battery"></div>
+    </div>
+
+    <div class="status-container" id="status-box">
+        <div id="progress-bar" class="progress-bar"></div>
+        <div class="status-content">
+            <span id="status-title" class="status-title">Ready.</span>
+            <span id="status-detail" class="status-detail">Press the button for actions.</span>
+        </div>
+    </div>
+
+    <div class="settings-box">
+        <div class="settings-title">Simulation Settings</div>
+        
+        <label class="mode-option">
+            <input type="radio" name="smsMode" value="test" checked>
+            <span class="mode-text">
+                <strong>Test Mode (Simulation)</strong><br>
+                <small>Simulates SMS sending locally. No costs. Visual feedback only.</small>
+            </span>
+        </label>
+
+        <label class="mode-option">
+            <input type="radio" name="smsMode" value="real">
+            <span class="mode-text">
+                <strong>Real SMS Mode</strong><br>
+                <small class="warning-text">⚠️ Sends real SMS (7 ct/SMS). Use responsibly!</small>
+            </span>
+        </label>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const SERVER_URL = ''; 
+
+        // --- Preload Images ---
+        const images = {
+            normal: 'alerta-normal.png',
+            centerPressed: 'alerta-pressed.png',
+            sidePressed: 'alerta-sidebutton-pressed.png'
+        };
+
+        const mainImage = document.getElementById('main-device-image');
+        const preloaded = {};
+        
+        for (let key in images) {
+            preloaded[key] = new Image();
+            preloaded[key].src = images[key];
+        }
+
+        function setImage(key) {
+            if(preloaded[key].complete) mainImage.src = preloaded[key].src;
+            else mainImage.src = images[key];
+        }
+
+        // --- Get Elements ---
+        const ledLight = document.getElementById('led-light');
+        const statusTitle = document.getElementById('status-title');
+        const statusDetail = document.getElementById('status-detail');
+        const progressBar = document.getElementById('progress-bar');
+
+        function setStatus(title, detail, color = "#333") {
+            statusTitle.innerText = title;
+            statusTitle.style.color = color;
+            statusDetail.innerHTML = detail; 
+        }
+
+        // --- Side Button (Battery & Green LED) ---
+        const btnSide = document.getElementById('hitbox-side');
+        
+        btnSide.addEventListener('click', () => {
+            setImage('sidePressed');
+            ledLight.classList.remove('active', 'active-red');
+            void ledLight.offsetWidth; 
+            ledLight.classList.add('active'); 
+            setStatus("Battery Status", "Battery: 100% charged.<br>System ready.", "green");
+
+            setTimeout(() => {
+                setImage('normal');
+                ledLight.classList.remove('active'); 
+                setStatus("Ready.", "Press the button for actions.");
+            }, 2500); 
+        });
+
+        // --- Center Button (SOS) ---
+        const btnCenter = document.getElementById('hitbox-center');
+        let sosTimer;
+        let countdownInterval;
+        let isComplete = false;
+
+        const startSOS = (e) => {
+            if(e.cancelable) e.preventDefault();
+            if(isComplete) return;
+
+            setImage('centerPressed');
+            progressBar.classList.remove('success'); 
+            progressBar.classList.add('loading');    
+            
+            // 3 Sekunden Startwert für Text-Countdown
+            let secondsLeft = 3;
+            setStatus(`SOS Mode`, `Hold for ${secondsLeft} seconds...`, "#d32f2f");
+
+            countdownInterval = setInterval(() => {
+                secondsLeft--;
+                if(secondsLeft > 0) {
+                    statusDetail.innerHTML = `Hold for ${secondsLeft} seconds...`;
+                } else {
+                    statusDetail.innerHTML = "Initializing GPS...";
+                }
+            }, 1000);
+
+            // 3 Sekunden Timer bis Auslösung
+            sosTimer = setTimeout(() => {
+                triggerSOS();
+            }, 3000);
+        };
+
+        const cancelSOS = (e) => {
+            if(e && e.cancelable) e.preventDefault();
+            if (!isComplete) {
+                clearTimeout(sosTimer);
+                clearInterval(countdownInterval);
+                setImage('normal');
+                progressBar.classList.remove('loading');
+                setStatus("Ready.", "Press the button for actions.");
+            }
+        };
+
+        function triggerSOS() {
+            isComplete = true;
+            clearInterval(countdownInterval);
+            
+            // LED Visualisierung (Rot)
+            ledLight.classList.remove('active', 'active-red');
+            void ledLight.offsetWidth; 
+            ledLight.classList.add('active-red'); 
+
+            progressBar.classList.add('success'); 
+            
+            // Prüfen welcher Modus aktiv ist
+            const isRealMode = document.querySelector('input[name="smsMode"][value="real"]').checked;
+            
+            const modeText = isRealMode ? "REAL MODE" : "TEST SIMULATION";
+            setStatus(`SOS SENT (${modeText})`, "Determining GPS...", "#d32f2f");
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const long = position.coords.longitude.toFixed(6);
+                        const gmapsLink = `https://www.google.com/maps?q=${lat},${long}`;
+                        
+                        // ENTSCHEIDUNG: ECHTER SERVER ODER SIMULATION?
+                        if (isRealMode) {
+                            // --- ECHTER VERSAND ---
+                            setStatus("SENDING REAL SMS...", `GPS: ${lat}, ${long}<br>Connecting to gateway...`, "#d32f2f");
+                            
+                            fetch(`${SERVER_URL}/api/sos`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ lat: lat, long: long })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if(data.success) {
+                                    setStatus("SMS SENT!", `Real help requested.<br><a href="${gmapsLink}" target="_blank">📍 Open Location</a>`, "#1b5e20");
+                                } else {
+                                    setStatus("SERVER ERROR", `Msg: ${data.message || 'Check Server Logs'}`, "#d32f2f");
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                setStatus("CONNECTION FAILED", "Server unreachable.", "#d32f2f");
+                            })
+                            .finally(() => resetSystem(8000));
+
+                        } else {
+                            // --- TEST SIMULATION ---
+                            setStatus("SIMULATING NETWORK...", `GPS found: ${lat}, ${long}`, "#1565c0");
+                            
+                            // Künstliche Verzögerung (2 Sekunden) um Netzwerk zu simulieren
+                            setTimeout(() => {
+                                setStatus(
+                                    "TEST SUCCESSFUL", 
+                                    `<b>[SIMULATION]</b> No SMS was sent (Test Mode).<br>GPS: ${lat}, ${long}`, 
+                                    "#1b5e20"
+                                );
+                                resetSystem(6000);
+                            }, 2000);
+                        }
+                    },
+                    (error) => {
+                        setStatus("GPS ERROR", "Could not retrieve location.<br>Enable GPS permissions.", "#d32f2f");
+                        resetSystem(4000);
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                setStatus("ERROR", "Browser does not support GPS.", "#d32f2f");
+                resetSystem(4000);
+            }
+        }
+
+        function resetSystem(delay = 2000) {
+            setTimeout(() => {
+                isComplete = false;
+                setImage('normal');
+                ledLight.classList.remove('active', 'active-red');
+                progressBar.classList.remove('loading', 'success');
+                setStatus("Ready.", "Press the button for actions.");
+            }, delay);
+        }
+
+        btnCenter.addEventListener('mousedown', startSOS);
+        btnCenter.addEventListener('touchstart', startSOS, {passive: false});
+        btnCenter.addEventListener('mouseup', cancelSOS);
+        btnCenter.addEventListener('mouseleave', cancelSOS);
+        btnCenter.addEventListener('touchend', cancelSOS);
+
+    </script>
+</body>
+</html>
