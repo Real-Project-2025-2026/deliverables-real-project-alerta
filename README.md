@@ -1,4 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/tAw-Y8uv)
 
 
-ALERTA PROJECT
+**ALERTA PROJECT**
+
+The final presentation in Gamma: https://gamma.app/docs/RPD-Alerta-Final-Presentation-ahxszsn0reyu645?mode=doc
