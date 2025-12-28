@@ -17,7 +17,7 @@ This repository contains the Virtual Prototype of the Alerta ecosystem, consisti
 
 You can test the virtual prototype directly in your browser without any local installation.
 
-👉 [Launch Virtual Prototype Dashboard](#)
+👉 [Launch Virtual Prototype Dashboard](https://168.119.118.172.nip.io/dashboard.html)
 
 ## Local Setup & Installation
 
