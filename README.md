@@ -11,7 +11,7 @@ This repository contains the Virtual Prototype of the Alerta ecosystem, consisti
 * **Mobile App Source Code**: Developed by Benjamín Morales Pizarro.
 * **Virtual Prototype & Backend**: Created by Kaner Etem.
 
-📘 **Business & Strategy**: The full Strategic Business Report (Business Model & Market Analysis) can be found in the Wiki of this repository.
+📘 **Business & Strategy**: The full Strategic Business Report (Business Model & Market Analysis) can be found [in the Wiki of this repository](https://github.com/Real-Project-2025-2026/deliverables-real-project-alerta/wiki).
 
 ## 🌐 Online Demo (Try it now)
 
