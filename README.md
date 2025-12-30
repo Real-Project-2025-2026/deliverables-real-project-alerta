@@ -23,6 +23,7 @@ You can test the virtual prototype directly in your browser without any local in
 Interested in learning more about Alerta or signing up for early access? Visit our landing page:
 
 👉 [https://watchalerta.netlify.app/](https://watchalerta.netlify.app/)
+
 _developed by Benjamín Morales Pizarro_
 
 The landing page showcases Alerta's features, benefits, and allows potential customers to register their interest for lead generation.
