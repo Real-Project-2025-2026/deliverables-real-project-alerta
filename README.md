@@ -19,6 +19,13 @@ You can test the virtual prototype directly in your browser without any local in
 
 👉 [Launch Virtual Prototype Dashboard](https://168.119.118.172.nip.io/dashboard.html)
 
+## 🔗 Product Landing Page
+Interested in learning more about Alerta or signing up for early access? Visit our landing page:
+
+👉 [https://watchalerta.netlify.app/](https://watchalerta.netlify.app/)
+
+The landing page showcases Alerta's features, benefits, and allows potential customers to register their interest for lead generation.
+
 ## Local Setup & Installation
 
 If you prefer to run the prototype locally, you will need Node.js and npm installed on your machine.
