@@ -9,9 +9,11 @@ It addresses "Panic Paralysis" by offering a discreet, physical "blind-press" bu
 This repository contains the Virtual Prototype of the Alerta ecosystem, consisting of a Node.js backend server and a React Native/Expo mobile app.
 
 * **Mobile App Source Code**: Developed by Benjamín Morales Pizarro.
-* **Virtual Prototype & Backend**: Created by Kaner Etem.
+* **Virtual Prototype & Backend**: Developed by Kaner Etem.
 
-📘 **Business & Strategy**: The full Strategic Business Report (Business Model & Market Analysis) can be found [in the Wiki of this repository](https://github.com/Real-Project-2025-2026/deliverables-real-project-alerta/wiki).
+## 📘 Business & Strategy
+
+The full Strategic Business Report (Business Model & Market Analysis) can be found [in the Wiki of this repository](https://github.com/Real-Project-2025-2026/deliverables-real-project-alerta/wiki/Strategic-Realization-Report:-Alerta)
 
 ## 🌐 Online Demo (Try it now)
 
